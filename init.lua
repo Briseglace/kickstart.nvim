@@ -932,3 +932,15 @@ require('lazy').setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- Overriding filetype for PL/SQL file extensions used at UQTR.
+vim.filetype.add {
+  extension = {
+    fnc = 'plsql',
+    pks = 'plsql',
+    pkb = 'plsql',
+    prc = 'plsql',
+    sql = 'plsql',
+    trg = 'plsql',
+  },
+}
