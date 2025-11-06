@@ -80,6 +80,10 @@ vim.o.scrolloff = 10
 -- See `:help 'confirm'`
 vim.o.confirm = true
 
+vim.o.shiftwidth = 4
+vim.o.expandtab = true
+vim.o.tabstop = 4
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -944,3 +948,10 @@ vim.filetype.add {
     trg = 'plsql',
   },
 }
+
+-- PLaieSQL LSP config
+vim.lsp.config['plaiesql'] = {
+  cmd = { '/home/briseglace/Code/kotlin/PlaieSQL/app/build/install/app/bin/app' },
+  filetypes = { 'sql', 'plsql' },
+}
+vim.lsp.enable 'plaiesql'
