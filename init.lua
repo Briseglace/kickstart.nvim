@@ -906,7 +906,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -941,17 +941,28 @@ require('lazy').setup({
 vim.filetype.add {
   extension = {
     fnc = 'plsql',
+    FNC = 'plsql',
     pks = 'plsql',
+    PKS = 'plsql',
     pkb = 'plsql',
+    PKB = 'plsql',
     prc = 'plsql',
+    PRC = 'plsql',
     sql = 'plsql',
+    SQL = 'plsql',
     trg = 'plsql',
+    TRG = 'plsql',
+    vw = 'plsql',
+    VW = 'plsql',
   },
 }
 
 -- PLaieSQL LSP config
 vim.lsp.config['plaiesql'] = {
-  cmd = { '/home/briseglace/Code/kotlin/PlaieSQL/app/build/install/app/bin/app' },
+  cmd = { '/home/briseglace/Code/PlaieSQL/app/build/install/app/bin/app' },
   filetypes = { 'sql', 'plsql' },
+  root_dir = vim.loop.cwd(),
 }
 vim.lsp.enable 'plaiesql'
+
+vim.loader.disable()
