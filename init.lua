@@ -653,7 +653,7 @@ do
       },
     },
 
-    kotlin_lsp = {}
+    kotlin_lsp = {},
   }
 
   vim.pack.add {
@@ -898,32 +898,7 @@ end
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 
--- Overriding filetype for PL/SQL file extensions used at UQTR.
-vim.filetype.add {
-  extension = {
-    fnc = 'plsql',
-    FNC = 'plsql',
-    pks = 'plsql',
-    PKS = 'plsql',
-    pkb = 'plsql',
-    PKB = 'plsql',
-    prc = 'plsql',
-    PRC = 'plsql',
-    sql = 'plsql',
-    SQL = 'plsql',
-    trg = 'plsql',
-    TRG = 'plsql',
-    vw = 'plsql',
-    VW = 'plsql',
-  },
-}
+-- vim.lsp.enable 'plaiesql'
+require 'after.lsp.plaiesql'
+vim.keymap.set('n', '<leader>db', '<cmd>ConnectToDatabase TEST_ALIAS<cr>', { desc = 'Connect to a database' })
 
--- PLaieSQL LSP config
-vim.lsp.config['plaiesql'] = {
-  cmd = { '/home/briseglace/Code/PlaieSQL/app/build/install/app/bin/app' },
-  filetypes = { 'sql', 'plsql' },
-  root_dir = vim.loop.cwd(),
-}
-vim.lsp.enable 'plaiesql'
-
-vim.loader.disable()
