@@ -21,15 +21,18 @@ vim.filetype.add {
   },
 }
 
-local function connect_to_database(opts)
-  local clients = vim.lsp.get_clients({ bufnr = 0, name = 'plaiesql' })
-
-  if #clients == 0 then
-    vim.notify('PLaieSQL client not running or not found', vim.log.levels.WARN)
+local function process_server_response(err, result)
+  if err then
+    vim.notify(err.message, vim.log.levels.ERROR)
     return
   end
-  local client = clients[1]
 
+  if result then
+    vim.notify(vim.inspect(result), vim.log.levels.INFO)
+  end
+end
+
+local function connect_to_database(client, opts)
   local connection_name = string.match(opts.args, "^(%S+)")
 
   local params = {
@@ -40,22 +43,37 @@ local function connect_to_database(opts)
 
   local remaining_args = string.sub(opts.args, #connection_name + 1)
 
-  for arg in string.gmatch(remaining_args, "%S+") do
-    local key, value = string.match(arg, "([^=]+)=([^=]+)")
+  for arg in string.gmatch(remaining_args, '%S+') do
+    local key, value = string.match(arg, '([^=]+)=([^=]+)')
     if key and params[key] ~= nil then
       params[key] = value
     end
   end
 
   client:request('database/connectTo', params, function(err, result)
-    if err then
-      vim.notify('LSP Error: ' .. err.message, vim.log.levels.ERROR)
-      return
-    end
+    process_server_response(err, result)
+  end)
+end
 
-    if result then
-      vim.notify('Server responded: ' .. vim.inspect(result), vim.log.levels.INFO)
-    end
+local function current_connection(client)
+  client:request('database/currentConnection', nil, function(err, result)
+    process_server_response(err, result)
+  end)
+end
+
+local function list_tns_names(client)
+  client:request('database/listNames', nil, function(err, result)
+    process_server_response(err, result)
+  end)
+end
+
+local function close_connection(client, opts)
+  local params = {
+    connectionName = opts.args,
+  }
+
+  client:request('database/closeConnection', params, function(err, result)
+    process_server_response(err, result)
   end)
 end
 
@@ -64,12 +82,36 @@ vim.lsp.config['plaiesql'] = {
   filetypes = { 'sql', 'plsql' },
   root_dir = vim.loop.cwd(),
   on_attach = function(client, bufnr)
-    vim.api.nvim_buf_create_user_command(bufnr, 'ConnectToDatabase', function(opts)
-      connect_to_database(opts)
+    vim.api.nvim_buf_create_user_command(bufnr, 'OpenConnection', function(opts)
+      connect_to_database(client, opts)
     end, {
       nargs = '+',
       desc = 'Connect to a database',
     })
+
+    vim.api.nvim_buf_create_user_command(bufnr, 'CurrentConnection', function()
+      current_connection(client)
+    end, {
+      desc = 'Get current connection name.',
+    })
+
+    vim.api.nvim_buf_create_user_command(bufnr, 'ListTnsNames', function()
+      list_tns_names(client)
+    end, {
+      desc = 'List all available TNS names.',
+    })
+
+    vim.api.nvim_buf_create_user_command(bufnr, 'CloseConnection', function(opts)
+      close_connection(client, opts)
+    end, {
+      nargs = 1,
+      desc = 'Close a database connection',
+    })
   end,
 }
+
 vim.lsp.enable 'plaiesql'
+
+-- Usefull keymaps
+vim.keymap.set('n', '<leader>dba', '<cmd>CurrentConnection<cr>', { desc = 'Get current connection name.' })
+vim.keymap.set('n', '<leader>dbl', '<cmd>ListTnsNames<cr>', { desc = 'List all available TNS names.' })

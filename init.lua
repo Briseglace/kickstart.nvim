@@ -900,5 +900,4 @@ end
 
 -- vim.lsp.enable 'plaiesql'
 require 'after.lsp.plaiesql'
-vim.keymap.set('n', '<leader>db', '<cmd>ConnectToDatabase TEST_ALIAS<cr>', { desc = 'Connect to a database' })
 
