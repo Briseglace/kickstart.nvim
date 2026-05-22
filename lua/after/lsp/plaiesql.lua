@@ -32,7 +32,7 @@ local function process_server_response(err, result)
   end
 end
 
-local function connect_to_database(client, opts)
+local function open_connection(client, opts)
   local connection_name = string.match(opts.args, "^(%S+)")
 
   local params = {
@@ -50,7 +50,7 @@ local function connect_to_database(client, opts)
     end
   end
 
-  client:request('database/connectTo', params, function(err, result)
+  client:request('database/openConnection', params, function(err, result)
     process_server_response(err, result)
   end)
 end
@@ -77,16 +77,26 @@ local function close_connection(client, opts)
   end)
 end
 
+local function execute_file(client, bufnr)
+  local params = {
+    script = table.concat(vim.api.nvim_buf_get_lines(bufnr, 0, -1, false), '\n')
+  }
+
+  client:request('database/execute', params, function(err, result)
+    process_server_response(err, result)
+  end)
+end
+
 vim.lsp.config['plaiesql'] = {
   cmd = { path_to_plaiesql },
   filetypes = { 'sql', 'plsql' },
   root_dir = vim.loop.cwd(),
   on_attach = function(client, bufnr)
     vim.api.nvim_buf_create_user_command(bufnr, 'OpenConnection', function(opts)
-      connect_to_database(client, opts)
+      open_connection(client, opts)
     end, {
       nargs = '+',
-      desc = 'Connect to a database',
+      desc = 'Connect to a database.',
     })
 
     vim.api.nvim_buf_create_user_command(bufnr, 'CurrentConnection', function()
@@ -105,7 +115,13 @@ vim.lsp.config['plaiesql'] = {
       close_connection(client, opts)
     end, {
       nargs = 1,
-      desc = 'Close a database connection',
+      desc = 'Close a database connection.',
+    })
+
+    vim.api.nvim_buf_create_user_command(bufnr, 'ExecuteFile', function()
+      execute_file(client, bufnr)
+    end, {
+      desc = 'Execute the current file using the current database connection.',
     })
   end,
 }
@@ -115,3 +131,4 @@ vim.lsp.enable 'plaiesql'
 -- Usefull keymaps
 vim.keymap.set('n', '<leader>dba', '<cmd>CurrentConnection<cr>', { desc = 'Get current connection name.' })
 vim.keymap.set('n', '<leader>dbl', '<cmd>ListTnsNames<cr>', { desc = 'List all available TNS names.' })
+vim.keymap.set('n', '<leader>dbc', '<cmd>ExecuteFile<cr>', { desc = 'Execute the current file using the current database connection.' })
