@@ -895,9 +895,13 @@ do
   require 'custom.plugins'
 end
 
+local plaiesql = require 'custom.plugins.plaiesql'
+plaiesql.path_to_plaiesql = '/home/briseglace/Code/PlaieSQL/app/build/install/app/bin/app'
+plaiesql.default_user = 'plaiesql'
+plaiesql.default_password = 'test'
+plaiesql.use_default_keymaps()
+plaiesql.enable()
+vim.keymap.set('n', '<leader>d1', '<cmd>OpenConnection TEST_ALIAS<cr>', { desc = 'Connect to TEST_ALIAS.' })
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
-
--- vim.lsp.enable 'plaiesql'
-require 'after.lsp.plaiesql'
-
